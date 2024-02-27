@@ -88,7 +88,7 @@ function genActorsListPage(content){
     content.forEach(entry => {
         pagHTML += `
             <tr>
-                <td><a href='/movies/${entry.id}'>${entry.id}</a></td>
+                <td><a href='/actors/${entry.id}'>${entry.id}</a></td>
                 <td>${entry.Name}</td>
             </tr>
         `
@@ -142,14 +142,13 @@ function genGenresListPage(content){
                     <table class = "w3-table w3-striped">
                         <tr>
                             <th>Identificador</th>
-                            <th>Título</th>
-                            <th>Ano</th>
+                            <th>Nome</th>
                         </tr>`
 
     content.forEach(entry => {
         pagHTML += `
             <tr>
-                <td><a href='/movies/${entry._id}'>${entry.id}</a></td>
+                <td><a href='/genres/${entry.id}'>${entry.id}</a></td>
                 <td>${entry.Name}</td>
             </tr>
         `

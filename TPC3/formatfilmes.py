@@ -15,14 +15,14 @@ def main():
                 cast = movie['cast']
             if cast:
                 for actor in cast:
-                    if actor not in actors_db:
+                    if {'Name': actor} not in actors_db:
                         actors_db.append({'Name': actor})
             genres = None
             if 'genres' in movie:
                 genres = movie['genres']
             if genres:
                 for genre in genres:
-                    if genre not in genres_db:
+                    if {'Name': genre} not in genres_db:
                         genres_db.append({'Name': genre})
             movies_db.append(movie)
             print(movie)
