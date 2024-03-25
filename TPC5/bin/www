@@ -89,4 +89,4 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-console.log("Servidor à escuta na porta" + port)
+console.log("Servidor à escuta na porta " + port)

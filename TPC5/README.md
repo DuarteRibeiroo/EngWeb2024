@@ -1,3 +1,3 @@
 # TPC5
 
-Foi-nos pedido para criar um serviço de consulta, criação, edição e eliminação de registos de compositores e períodos, a partir de um ficheiro JSON, desta vez através de Express com páginas escritas em Pug. Apenas foi necessário editar o código dos exemplos feitos nas aulas para acomodar os novos tipos de dados.
+Foi-nos pedido para criar um serviço de consulta, criação, edição e eliminação de registos de compositores e períodos, a partir de um ficheiro JSON, desta vez através de Express com páginas escritas em Pug. Apenas foi necessário editar o código dos exemplos feitos nas aulas para acomodar os novos tipos de dados, com a  nuance adicionada de manter consistência entre as coleções de compositores e períodos automaticamente. Quando um compositor é adicionado/eliminado/editado, é verificado se esse período já/ainda não existe, e a coleção de períodos atualizada de acordo.
