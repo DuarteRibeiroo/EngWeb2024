@@ -59,22 +59,6 @@ router.get('/periodos', function(req,res,next){
     })
 })
 
-router.get('/periodos/registo', function(req, res, next) {
-  var d = new Date().toISOString().substring(0, 16)
-  res.render('registoPeriodo', {data: d, title: 'Registar Período'});
-});
-
-router.get('/periodos/edit/:id', function(req,res,next){
-  var d = new Date().toISOString().substring(0, 16)
-  axios.get('http://localhost:3000/periodos/' + req.params.id)
-    .then(response => {
-      res.render('editarPeriodo', { periodo: response.data,data: d, title: 'Editar Período' });
-    })
-    .catch(function(erro){
-        res.render('error', {error: erro, message: 'Erro na obtenção do periodo!'})
-    })
-})
-
 router.get('/periodos/:id', function(req, res, next) {
   var d = new Date().toISOString().substring(0, 16)
   axios.get('http://localhost:3000/periodos/' + req.params.id)
@@ -82,7 +66,7 @@ router.get('/periodos/:id', function(req, res, next) {
       res.render('periodo', {periodo: response.data,data: d, title: 'Período'});
     })
     .catch(function(erro){
-        res.render('error', {error: erro, message: 'Erro na obtenção do compositor!'})
+        res.render('error', {error: erro, message: 'Erro na obtenção do período!'})
     })
 });
 
@@ -91,6 +75,24 @@ router.get('/periodos/:id', function(req, res, next) {
 router.get('/compositores/delete/:id', function(req,res,next){
   axios.delete('http://localhost:3000/compositores/' + req.params.id, req.body)
     .then(response => {
+      var periodo = response.data.periodo
+      axios.get('http://localhost:3000/compositores?periodo=' + periodo)
+      .then(response => {
+        if(response.data.length == 0){
+          axios.get('http://localhost:3000/periodos?Periodo=' + periodo)
+            .then(response2 => {
+              axios.delete('http://localhost:3000/periodos/' + response2.data[0].id, req.body)
+                .then(response => {
+                })
+                .catch(function(erro){
+                    res.render('error', {error: erro, message: 'Erro na eliminação do período!'})
+                })
+            })
+            .catch(function(erro){
+                res.render('error', {error: erro, message: 'Erro na obtenção do período!'})
+            })
+        }
+      })  
       res.redirect('http://localhost:7777/compositores/');
     })
     .catch(function(erro){
@@ -98,21 +100,22 @@ router.get('/compositores/delete/:id', function(req,res,next){
     })
 })
 
-router.get('/periodos/delete/:id', function(req,res,next){
-  axios.delete('http://localhost:3000/periodos/' + req.params.id, req.body)
-    .then(response => {
-      res.redirect('http://localhost:7777/periodos/');
-    })
-    .catch(function(erro){
-        res.render('error', {error: erro, message: 'Erro na edição do periodo!'})
-    })
-})
-
-
-
-
 //POSTs --------------------
 router.post('/compositores/registo', function(req, res, next) {
+  axios.get('http://localhost:3000/compositores?periodo=' + req.body.periodo)
+    .then(response => {
+      if(response.data.length == 0){
+        var periodo = {
+          Periodo: req.body.periodo
+        }
+        axios.post('http://localhost:3000/periodos', periodo)
+          .then(response => {
+          })
+          .catch(function(erro){
+              res.render('error', {error: erro, message: 'Erro na criação do período!'})
+          })
+      }
+    })
   axios.post('http://localhost:3000/compositores', req.body)
     .then(response => {
       res.redirect('http://localhost:7777/compositores/' + req.body.id);
@@ -122,35 +125,61 @@ router.post('/compositores/registo', function(req, res, next) {
     })
 })
 
-router.post('/periodos/registo', function(req, res, next) {
-  axios.post('http://localhost:3000/periodos', req.body)
-    .then(response => {
-      res.redirect('http://localhost:7777/periodo/' + req.body.id);
-    })
-    .catch(function(erro){
-        res.render('error', {error: erro, message: 'Erro na criação do periodo!'})
-    })
-})
-
 //PUTs ---------------------
 router.post('/compositores/edit/:id', function(req,res,next){
-  axios.put('http://localhost:3000/compositores/' + req.params.id, req.body)
+  axios.get('http://localhost:3000/compositores/' + req.params.id)
     .then(response => {
-      res.redirect('http://localhost:7777/compositores/' + req.params.id);
+      var periodo = response.data.periodo
+      axios.put('http://localhost:3000/compositores/' + req.params.id, req.body)
+        .then(response => {
+          axios.get('http://localhost:3000/compositores?periodo=' + periodo)
+          .then(response => {
+            console.log(response.data)
+            if(response.data.length == 0){
+              axios.get('http://localhost:3000/periodos?Periodo=' + periodo)
+                .then(response2 => {
+                  var a= response2.data[0].id
+                  axios.delete('http://localhost:3000/periodos/' + response2.data[0].id, req.body)
+                    .then(response => {
+                      axios.get('http://localhost:3000/compositores?periodo=' + req.body.periodo)
+                        .then(response => {
+                          if(response.data.length == 1){
+                            var periodo2 = {
+                              Periodo: req.body.periodo
+                            }
+                            axios.post('http://localhost:3000/periodos', periodo2)
+                              .then(response => {
+                                res.redirect('http://localhost:7777/compositores/' + req.params.id);
+                              })
+                              .catch(function(erro){
+                                  res.render('error', {error: erro, message: 'Erro na criação do período!'})
+                              })
+                          }
+                          else{
+                            res.redirect('http://localhost:7777/compositores/' + req.params.id);
+                          }
+                        })
+                    })
+                    .catch(function(erro){
+                        res.render('error', {error: erro, message: 'Erro na eliminação do período!'})
+                    })
+                })
+                .catch(function(erro){
+                    res.render('error', {error: erro, message: 'Erro na obtenção do período!'})
+                })
+            }
+            else{
+              res.redirect('http://localhost:7777/compositores/' + req.params.id);
+            }
+          })  
+        })
+        .catch(function(erro){
+            res.render('error', {error: erro, message: 'Erro na edição do compositor!'})
+        })
     })
     .catch(function(erro){
-        res.render('error', {error: erro, message: 'Erro na edição do compositor!'})
-    })
-})
-
-router.post('/periodos/edit/:id', function(req,res,next){
-  axios.put('http://localhost:3000/periodos/' + req.params.id, req.body)
-    .then(response => {
-      res.redirect('http://localhost:7777/periodos/' + req.params.id);
-    })
-    .catch(function(erro){
-        res.render('error', {error: erro, message: 'Erro na edição do periodo!'})
-    })
+      res.render('error', {error: erro, message: 'Erro na obtenção do compositor!'})
+  })
 })
 
 
